@@ -46,4 +46,4 @@ jobs:
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
       uses: Ilshidur/action-discord@master
       with:
-        args: "I showed you my commit. Please respond."
+        args: 'The project {{ EVENT_PAYLOAD.Docker_practice.Mendoza-Matias }} has been deployed.'
