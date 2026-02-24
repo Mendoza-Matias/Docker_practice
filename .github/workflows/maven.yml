@@ -28,27 +28,18 @@ jobs:
     - name: Build with Maven
       # Si todo sale bien y se genera el JAR, entonces se construye la imagen Docker
       run: mvn -B package --file pom.xml
-    - name: Upload Report
-      uses: 'actions/upload-artifact@v3'
+    - name: JaCoCo Code Coverage Report
+      id: jacoco_reporter
+      uses: PavanMudigonda/jacoco-reporter@v5.0
       with:
-        name: jacoco-report
-        # Genera un reporte de cobertura de código con JaCoCo y lo sube como artefacto para que pueda ser descargado posteriormente
-        path: |
-          ${{ github.workspace }}/target/site/jacoco/jacoco.xml 
-          ${{ github.workspace }}/target/site/jacoco/index.html
-    - name: Add coverage to PR
-      id: jacoco
-      uses: madrapps/jacoco-report@v1.6.1
-      with:
-        paths: ${{ github.workspace }}/target/site/jacoco/jacoco.xml
-        token: ${{ secrets.TOKEN }}
-        min-coverage-overall: 80
-        min-coverage-changed-files: 60
-        title: '# :recycle: Coverage Report'
-        update-comment: true
-        pass-emoji: ':green_circle:'
-        fail-emoji: ':red_circle:'
-      
+        coverage_results_path: jacoco-report/test.xml
+        coverage_report_name: Coverage
+        coverage_report_title: JaCoCo
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        skip_check_run: false
+        minimum_coverage: 80
+        fail_below_threshold: false
+        publish_only_summary: false
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
     - name: Login to DockerHub
