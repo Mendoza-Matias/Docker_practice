@@ -34,16 +34,15 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-    # Construye y sube la imagen de Docker a DockerHub utilizando el contexto actual (.) y etiquetándola con el nombre de usuario y el nombre de la imagen.
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
-          context: .
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/payment-manager:latest
+        context: .
+        push: true
+        tags: ${{ secrets.DOCKER_USERNAME }}/payment-manager:latest
     - name: Discord Notification
       env:
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
       uses: Ilshidur/action-discord@master
       with:
-        args: 'The project {{ EVENT_PAYLOAD.Docker_practice.Mendoza-Matias }} has been deployed.'
+        args: 'The payment-manager project has been deployed successfully.'
