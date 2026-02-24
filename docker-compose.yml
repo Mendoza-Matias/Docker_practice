@@ -1,0 +1,9 @@
+services:
+  docker-payment-manager-service:
+    container_name: payment-manager-service
+    # Corre el comando de construcción para crear la imagen de Docker a partir del Dockerfile ubicado en el directorio actual (.)
+    build: . 
+    image: payment-manager-service:latest
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
