@@ -27,11 +27,11 @@ jobs:
           ${{ runner.os }}-maven-
     - name: Build with Maven
       # Si todo sale bien y se genera el JAR, entonces se construye la imagen Docker
-      run: mvn -B package --file pom.xml
+      run: mvn test cobertura:cobertura
     - name: Coverage of tests
       uses: 5monkeys/cobertura-action@master
       with:
-        path: src/test.xml
+        path: target/site/cobertura/coverage.xml
         minimum_coverage: 75
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
