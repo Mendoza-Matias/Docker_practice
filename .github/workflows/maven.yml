@@ -6,55 +6,59 @@ on:
   pull_request:
     branches: [ "master" ]
 
+# Permisos para que el workflow pueda crear check runs y comentar en pull requests
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-    - name: Cache Maven packages
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
-    - name: JaCoCo Code Coverage Report
-      id: jacoco_reporter
-      uses: PavanMudigonda/jacoco-reporter@v5.0
-      with:
-        coverage_results_path: target/site/jacoco/jacoco.xml
-        coverage_report_name: Coverage
-        coverage_report_title: JaCoCo
-        github_token: ${{ secrets.PAT_TOKEN }} 
-        skip_check_run: false
-        minimum_coverage: 80
-        fail_below_threshold: false
-        publish_only_summary: false
-    - name: Set up Docker Buildx
-      if: github.event_name == 'push'
-      uses: docker/setup-buildx-action@v3
-    - name: Login to DockerHub
-      if: github.event_name == 'push'
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-    - name: Build and push Docker image
-      if: github.event_name == 'push'
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        push: true
-        tags: |
-          ${{ secrets.DOCKER_USERNAME }}/payment-manager:${{ github.sha }}
-          ${{ secrets.DOCKER_USERNAME }}/payment-manager:latest
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn -B clean test
+
+      - name: JaCoCo Code Coverage Report
+        id: jacoco_reporter
+        uses: PavanMudigonda/jacoco-reporter@v5.0
+        with:
+          coverage_results_path: target/site/jacoco/jacoco.xml
+          coverage_report_name: Coverage
+          coverage_report_title: JaCoCo
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          skip_check_run: false
+          minimum_coverage: 80
+          fail_below_threshold: false
+          publish_only_summary: false
+
+      - name: Set up Docker Buildx
+        if: github.event_name == 'push'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        if: github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        if: github.event_name == 'push'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/payment-manager:${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/payment-manager:latest
